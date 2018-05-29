@@ -43,12 +43,19 @@ The package includes the bam file corresponding to a subset of ??AUTHORS?? Hi-C 
 
 2) HIFI
 ```
-HIFI <sparseInputMatrix.tsv> <sparseOutputMatrix> <options>
-Required input files:
+HIFI <sparseInputMatrix.tsv> <sparseOutputMatrix.tsv> <options>
+Required arguments:
 	sparseInputMatrix.tsv: A tab-separated or space-separated file, where 
-		- the first line specifies the index of the restriction fragment corresponding to the first and last row, and first and last column of the input read count matrix. Example: #3 7577 3 7577
-		- each subsequent row corresponds to one entry of the matrix, using the format: Readcount_ij Chr_i RF_i Chr_j RF_j. Example: "3 22 91 22 5005" means that there are 3 read pairs connecting restriction fragments 91 and 5005 on chromosome 22.
-
+		- the first line specifies the index of the restriction fragment 
+		  corresponding to the first and last row, and first and last column 
+		  of the input read count matrix. 
+		  Example: "#3 7577 3 7577"
+		- each subsequent row corresponds to one entry of the matrix, using the format: 
+		  Readcount_ij Chr_i RF_i Chr_j RF_j. 
+		  Example: "3 22 91 22 5005" means that there are 3 read pairs connecting 
+		           restriction fragments 91 and 5005 on chromosome 22.
+	sparseOutputFile.tsv: Name of file where output will be written, in the same format as the input file.
+	
 Options:
 Estimation method:
 	-method=[fixed|kde|akde|mrf]
