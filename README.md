@@ -21,6 +21,7 @@ Output: Estimated interaction frequency matrix at restriction-fragment resolutio
 
 ## Installation guide
 Installation is expected to take a few minutes:
+
 1A) Download the package by clicking the "Clone or download" button, unzip file in desired location, and rename directory "HIFI"
 OR
 1B) Copy the git link provided, and use "git clone https://github.com/BlanchetteLab/HIFI" from the command line.
