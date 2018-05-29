@@ -6,9 +6,13 @@ HIFI is a set of tools to infer true intra-chromosomal interaction frequencies a
 It uses adaptive kernel density estimation and Markov Random Field approaches to provide accurate estimates of interaction frequency matrices from sparse read-count matrices.
 
 Input: A bam file corresponding to Hi-C data from a given chromosome. 
+
 Step 1: Produce a restriction fragment resolution read count matrix, using the ?? program.
+
 Step 2: Produce the restriction fragment resolution true IF estimation, using the HIFI program itself.
+
 Step 3: (optional) Visualize the inferred true IF matrix, using the ?? program. 
+
 Output: Estimated interaction frequency matrix at restriction-fragment resolution
 
 ## Software requirements
