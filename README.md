@@ -1,7 +1,7 @@
 # HIFI
 A tool for high-resolution estimation of DNA-DNA interaction frequency from Hi-C data
 
-##Overview
+## Overview
 HIFI is a set of tools to infer true intra-chromosomal interaction frequencies at restriction fragment resolution from Hi-C data. 
 It uses adaptive kernel density estimation and Markov Random Field approaches to provide accurate estimates of interaction frequency matrices from sparse read-count matrices.
 
@@ -11,11 +11,11 @@ Step 2: Produce the restriction fragment resolution true IF estimation, using th
 Step 3: (optional) Visualize the inferred true IF matrix, using the ?? program. 
 Output: Estimated interaction frequency matrix at restriction-fragment resolution
 
-##Software requirements
+## Software requirements
 1) Linux with gcc compiler
 2) ???CHRIS???
 
-##Installation guide
+## Installation guide
 Installation is expected to take a few minutes:
 1) Download the package by clicking the "Clone or download" button
 2) Click "download ZIP", download file, and unzip file in desired location, and rename directory "HIFI"
@@ -25,7 +25,7 @@ Copy the git link provided, and use "git clone https://github.com/BlanchetteLab/
 4) make HIFI
 ?? CHRIS ??
 
-##Quick start
+## Quick start
 The package includes the bam file corresponding to a subset of ??AUTHORS?? Hi-C data (REFERENCE), limited to region chr?:1234-4567. This is the data we are going to use as example.
 1) Process bam file (expected run time: ??):
 COMMAND LINE?
@@ -36,7 +36,7 @@ COMMAND LINE?
 3) Visualize the output IF matrix (expected run time: ??):
 COMMAND LINE?
 
-##Details:
+## Details:
 1) Processing of bam file
 
 2) HIFI
@@ -82,10 +82,10 @@ Optimizations
 
 3) True-size RF-resolution IF matrix visualization
 
-##Testing
+## Testing
 All software was tested on Linux Ubuntu 12.04.5 LTS (GNU/Linux 3.2.0-86-generic x86_64).
 
-##License:
+## License:
 RobusTAD is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation.
 
 RobusTAD is distributed in the hopes that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
