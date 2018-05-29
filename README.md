@@ -22,19 +22,10 @@ Output: Estimated interaction frequency matrix at restriction-fragment resolutio
 ## Installation guide
 Installation is expected to take a few minutes:
 
-Download the package by clicking the "Clone or download" button, unzip file in desired location, and rename directory "HIFI"
-OR
-Copy the git link provided, and use ``` git clone https://github.com/BlanchetteLab/HIFI ``` from the command line.
-
-2) 
-```
-cd HIFI
-```
-3) 
-```
-make HIFI
-```
-?? CHRIS ??
+1) Either download the package by clicking the "Clone or download" button, unziping file in desired location, and renaming directory "HIFI"   OR   Use the command line ``` git clone https://github.com/BlanchetteLab/HIFI ```.
+2) ``` cd HIFI ```
+3) ``` make HIFI ```
+4) ?? CHRIS ??
 
 ## Quick start
 The package includes the bam file corresponding to a subset of ??AUTHORS?? Hi-C data (REFERENCE), limited to region chr?:1234-4567. This is the data we are going to use as example.
