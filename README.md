@@ -22,11 +22,18 @@ Output: Estimated interaction frequency matrix at restriction-fragment resolutio
 ## Installation guide
 Installation is expected to take a few minutes:
 
-1) Download the package by clicking the "Clone or download" button, unzip file in desired location, and rename directory "HIFI"
+Download the package by clicking the "Clone or download" button, unzip file in desired location, and rename directory "HIFI"
 OR
-1) Copy the git link provided, and use "git clone https://github.com/BlanchetteLab/HIFI" from the command line.
-2) cd HIFI
-3) make HIFI
+Copy the git link provided, and use ``` git clone https://github.com/BlanchetteLab/HIFI ``` from the command line.
+
+2) 
+```
+cd HIFI
+```
+3) 
+```
+make HIFI
+```
 ?? CHRIS ??
 
 ## Quick start
