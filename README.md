@@ -42,7 +42,7 @@ The package includes the bam file corresponding to a subset of ??AUTHORS?? Hi-C 
 1) Processing of bam file
 
 2) HIFI
-
+```
 HIFI <sparseInputMatrix.tsv> <sparseOutputMatrix> <options>
 Options:
 Estimation method:
@@ -80,7 +80,7 @@ Subsetting options
 
 Optimizations
 	-bandSize=<INTEGER> : Limits the analysis to a band of the given width along the main diagonal. Useful when analyzing very large matrices, to limit the analysis to short range contacts. Default: inactive
-
+```
 
 3) True-size RF-resolution IF matrix visualization
 
