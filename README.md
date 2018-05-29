@@ -30,15 +30,15 @@ Installation is expected to take a few minutes:
 ## Quick start
 The package includes the bam file corresponding to a subset of ??AUTHORS?? Hi-C data (REFERENCE), limited to region chr?:1234-4567. This is the data we are going to use as example.
 1) Process bam file (expected run time: ??):
-COMMAND LINE?
+```COMMAND LINE?```
 
 2) Run HIFI with default parameters (expected run time: ??):
-./HIFI example/example.tsv example/HIFI_output.tsv
+``` ./HIFI example/example.tsv example/HIFI_output.tsv ```
 
 3) Visualize the output IF matrix (expected run time: ??):
-COMMAND LINE?
+```COMMAND LINE?```
 
-## Details:
+## Command line details:
 1) Processing of bam file
 
 2) HIFI
