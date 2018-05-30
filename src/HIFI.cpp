@@ -107,8 +107,6 @@ void setBoundaries(UpperDiag<float> &OoverBias, UpperDiag<char> &horizontalBound
     }
 
     if (maxks>options.boundaryKS) {
-      //      fprintf(stderr,"For row %d, boundary from %d to %d, with ks=%lf\n",i,maxj, maxj2,maxks);
-      fflush(stderr);
       for (int j=maxj;j<=maxj2;j++) {
 	horizontalBoundary.set(i,j,1);
 	//	verticalBoundary.set(j,i,1);
@@ -181,8 +179,6 @@ void setBoundaries(UpperDiag<float> &OoverBias, UpperDiag<char> &horizontalBound
     }
 
     if (maxks>options.boundaryKS) {
-      //fprintf(stderr,"For columns %d, vertical boundary from %d to %d, with ks=%lf\n",j,maxi, maxi2,maxks);
-      fflush(stderr);
       for (int i=maxi;i<=maxi2;i++) {
 	verticalBoundary.set(i,j,1);
       }
@@ -604,10 +600,6 @@ void precomputeStuff() {
 }
 
 
-void  allocateMemory() {
-}
-
-
 
 void getMatrixSize(char *fn) {
   matrixProperties.fullMatrix_firstRow=matrixProperties.fullMatrix_firstCol=999999999;
@@ -617,8 +609,8 @@ void getMatrixSize(char *fn) {
   matrixProperties.fullMatrix_size=max(matrixProperties.fullMatrix_lastRow,matrixProperties.fullMatrix_lastCol)+1;
   
   if (options.firstRow==-1) {
-    options.firstRow=0;
-    options.firstCol=0;
+    options.firstRow=matrixProperties.fullMatrix_firstRow;
+    options.firstCol=matrixProperties.fullMatrix_firstCol;
     options.lastRow=matrixProperties.fullMatrix_lastRow;
     options.lastCol=matrixProperties.fullMatrix_lastCol;
   }
@@ -639,29 +631,24 @@ void readFullOMatrix(char *fn, UpperDiag<float> *mat, float *bias, bool setBias)
 
   double fullSum=0;
   double *sumRow=(double*)malloc(matrixProperties.fullMatrix_size*sizeof(double));
-  for (int i=0;i<matrixProperties.fullMatrix_size;i++) {
+  for (int i=matrixProperties.fullMatrix_firstRow;i<=matrixProperties.fullMatrix_lastRow;i++) {
     sumRow[i]=BIAS_PSEUDOCOUNT;
+    fullSum+=BIAS_PSEUDOCOUNT;
   }
-  fullSum+=matrixProperties.fullMatrix_size*BIAS_PSEUDOCOUNT;
-  
-  matrixProperties.chr1=-1;
-  matrixProperties.chr2=-1;
-  
   
   while (fscanf(f,"%[^\n]\n",line)!=EOF) {
     if (line[0]=='#' || line[0]=='0') continue;
-    
     int foo;
     int p1,p2;
     float c;
-    int c1;
-    int c2;
-    sscanf(line,"%f %d %d %d %d",&c,&c1,&p1,&c2,&p2);
+    char c1[100];
+    char c2[100];
+    sscanf(line,"%f %s %d %s %d",&c,c1,&p1,c2,&p2);
     
-    if (matrixProperties.chr1==-1) {matrixProperties.chr1=c1;}
-    else { if (c1!=matrixProperties.chr1) {fprintf(stderr,"ERROR: input file contains data from multiple chromosomes: %d and %d\n",matrixProperties.chr1, c1);exit(1);}}
-    if (matrixProperties.chr2==-1) {matrixProperties.chr2=c2;}
-    else { if (c2!=matrixProperties.chr2) {fprintf(stderr,"ERROR: input file contains data from multiple chromosomes: %d and %d\n",matrixProperties.chr2, c2);exit(1);}}
+    if (matrixProperties.chr1[0]==0) {strcpy(matrixProperties.chr1,c1);}
+    else { if (strcmp(c1,matrixProperties.chr1)) {fprintf(stderr,"ERROR: input file contains data from multiple chromosomes: %s and %s\n",matrixProperties.chr1, c1);exit(1);}}
+    if (matrixProperties.chr2[0]==0) {strcpy(matrixProperties.chr2,c2);}
+    else { if (strcmp(c2,matrixProperties.chr2)) {fprintf(stderr,"ERROR: input file contains data from multiple chromosomes: %s and %s\n",matrixProperties.chr2, c2);exit(1);}}
     
     
     
@@ -681,8 +668,8 @@ void readFullOMatrix(char *fn, UpperDiag<float> *mat, float *bias, bool setBias)
   fclose(f);
   
   if (setBias) {
-    for (int i=0;i<matrixProperties.fullMatrix_size;i++) {
-      bias[i]=sumRow[i]/((fullSum)/matrixProperties.fullMatrix_size);
+    for (int i=matrixProperties.fullMatrix_firstRow;i<matrixProperties.fullMatrix_lastRow;i++) {
+      bias[i]=sumRow[i]/((fullSum)/(matrixProperties.fullMatrix_lastRow-matrixProperties.fullMatrix_firstRow+1));
       if (bias[i]>MAX_BIAS) bias[i]=MAX_BIAS;
       if (bias[i]<1.0/MAX_BIAS) bias[i]=1.0/MAX_BIAS;
     }
@@ -762,7 +749,6 @@ void computeTMatrix_mrf(UpperDiag<float> &O, UpperDiag<float> &OoverBias, UpperD
         
     for (int i=O.startRow();i<O.endRow();i++) {
       for (int j=O.startCol(i)+1;j<O.endCol(i);j++) {
-	
 	// check if anything in the neighbourhood has changed
 	
 	int neiLeft=max(O.startRow(),i-2);
@@ -833,7 +819,7 @@ void outputSparseMatrix(char *fn, UpperDiag<float> &T, float *bias) {
     for (int j=T.startCol(i);j<T.endCol(i);j++){
       float x=T.get(i,j);
       if (!options.outputNormalized) x*=(bias[i]*bias[j]);
-      if (x>options.minOutput) fprintf(out,"%5.3lf %d %d %d %d\n",x/options.minOutput,matrixProperties.chr1,i,matrixProperties.chr2,j);
+      if (x>options.minOutput) fprintf(out,"%5.3lf %s %d %s %d\n",x/options.minOutput,matrixProperties.chr1,i,matrixProperties.chr2,j);
     }
   }
   fclose(out);
@@ -847,7 +833,7 @@ void outputSparseBoundaryMatrix(char *fn, UpperDiag<char> &horizontalBoundary,Up
 
   for (int i=horizontalBoundary.startRow();i<horizontalBoundary.endRow();i++) {
     for (int j=horizontalBoundary.startCol(i)+1;j<horizontalBoundary.endCol(i)-1;j++){
-      if (horizontalBoundary.get(i,j) || (i!=0 && horizontalBoundary.get(i-1,j)) ||  verticalBoundary.get(i,j) || (j!=0 && verticalBoundary.get(i,j-1))) fprintf(out,"1 %d %d %d %d\n",matrixProperties.chr1,i+options.firstRow,matrixProperties.chr2,j+options.firstCol);
+      if (horizontalBoundary.get(i,j) || (i!=0 && horizontalBoundary.get(i-1,j)) ||  verticalBoundary.get(i,j) || (j!=0 && verticalBoundary.get(i,j-1))) fprintf(out,"1 %s %d %s %d\n",matrixProperties.chr1,i+options.firstRow,matrixProperties.chr2,j+options.firstCol);
     }
   }
   fclose(out);
@@ -880,15 +866,12 @@ int main(int argc, char *argv[]) {
   O = UpperDiag<float>(options.firstRow,options.firstCol,options.lastRow,options.lastCol, options.bandSize);
   OoverBias = UpperDiag<float>(options.firstRow,options.firstCol,options.lastRow,options.lastCol, options.bandSize);
   
-
   float *bias=(float*) malloc(matrixProperties.fullMatrix_size*sizeof(float));
   for (int i=0;i<matrixProperties.fullMatrix_size;i++) bias[i]=1;
 
-  
   fprintf(stderr,"Reading matrix\n");
   readFullOMatrix(argv[1], &O, bias, true);
   computeOoverBias(O,OoverBias, bias);
-
   if (options.method_fixed) computeTMatrix_fixed(O, T, bias);
   if (options.method_kde || options.method_akde)  computeTMatrix_kde(O, OoverBias, T);
   if (options.method_mrf) computeTMatrix_mrf(O, OoverBias, T, bias);

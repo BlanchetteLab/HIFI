@@ -68,7 +68,12 @@ class UpperDiag: public MyMatrix<T> {
 class HIFI_matrixProperties {
  public:
   int fullMatrix_firstRow,fullMatrix_firstCol,fullMatrix_lastRow, fullMatrix_lastCol, fullMatrix_size;
-  int chr1,chr2;
+  char chr1[100];
+  char chr2[100];
+
+  HIFI_matrixProperties() {
+    chr1[0]=chr2[0]=0;
+  }
 
 };
 
