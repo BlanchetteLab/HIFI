@@ -29,7 +29,7 @@ Installation is expected to take a few minutes:
 3) ``` make HIFI ```
 4) If Matplotlib or NumPy are not installed, install it using Anaconda (https://conda.io/docs/user-guide/install/download.html).
 5) If samtools is not installed, install it (http://www.htslib.org/download/) and make sure the samtools executable is in your path.
-6) Download into the examples directory the following test Hi-C data set from Rao et al. 2014: https://www.cs.mcgill.ca/~/HIFI/Rao_GM12878.hg19.chr9_example.bam
+6) Download into the examples directory the following test Hi-C data set from Rao et al. 2014: https://www.cs.mcgill.ca/~blanchem/HIFI/Rao_GM12878.hg19.chr9_example.bam
 
 ## Example data set
 The bam file linked just above comes from Rao et al. (2014), limited to intrachromosomal contacts in region chr9:122000000-132000000. This is the data we are going to use as example. The bam file was produced from fastq files using HiCUP's standard pipeline to map read pairs to hg19 and perform read-pair quality filtering. Additional filtering (MAPQ value >= 30) ensures unique mappability. 
