@@ -22,7 +22,7 @@ void HIFI_options::read(int argc, char *argv[]) {
     if (strstr(argv[i],"-kdeMinCount=")) {int x=sscanf(argv[i],"-kdeMinCount=%d",&kdeMinCount);if (x!=1) {fprintf(stderr,"Error: Can't read %s\n",argv[i]);} continue;}
     if (strstr(argv[i],"-boundaryKS=")) {int x=sscanf(argv[i],"-boundaryKS=%lf",&boundaryKS);if (x!=1) {fprintf(stderr,"Error: Can't read %s\n",argv[i]);} continue;}
 
-    if (!strcmp(argv[i],"-outputNormalized")) {outputNormalized=true; continue;}
+    if (!strcmp(argv[i],"-outputNotNormalized")) {outputNormalized=false; continue;}
     if (!strcmp(argv[i],"-noBias")) {noBias=true; continue;}
     if (strstr(argv[i],"-minOutput=")) {int x=sscanf(argv[i],"-minOutput=%lf",&minOutput); if (x!=1) {fprintf(stderr,"Error: Can't read %s\n",argv[i]);} ; continue;}
     if (strstr(argv[i],"-mrfMaxIter=")) {int x=sscanf(argv[i],"-mrfMaxIter=%d",&mrfMaxIter); if (x!=1) {fprintf(stderr,"Error: Can't read %s\n",argv[i]);} ; continue;}
@@ -59,6 +59,8 @@ void HIFI_options::print() {
   printf("option -lastCol = %d\n",lastCol);
   printf("option -boundaryKS = %f\n",boundaryKS);
   printf("option -minOutput = %lf\n",minOutput);
+  printf("option -outputNotNormalized = %d\n",(int)(1-outputNormalized));
+
   printf("option -bandSize = %d\n",bandSize);
 }
 

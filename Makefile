@@ -1,2 +1,2 @@
 HIFI: src/HIFI.cpp src/HIFI_options.cpp
-	g++ -O4 -o bin/HIFI src/HIFI.cpp src/HIFI_options.cpp -lm
+	g++ -O4 -o src/HIFI src/HIFI.cpp src/HIFI_options.cpp -lm

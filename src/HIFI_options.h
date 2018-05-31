@@ -55,7 +55,7 @@ class HIFI_options {
     noBias=false;
     boundaryKS=2.0;
     diagRenormalization=true;
-    outputNormalized=false;
+    outputNormalized=true;
     minOutput=0.00001;
     mrfMaxIter=5;
     firstRow=-1;

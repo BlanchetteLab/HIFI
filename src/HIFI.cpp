@@ -605,6 +605,10 @@ void getMatrixSize(char *fn) {
   matrixProperties.fullMatrix_firstRow=matrixProperties.fullMatrix_firstCol=999999999;
   matrixProperties.fullMatrix_lastRow=matrixProperties.fullMatrix_lastCol=-1;
   FILE *f=fopen(fn,"r");
+  if (!f) {
+    fprintf(stderr,"Error: Can't open input file %s\n",fn);
+    exit(1);
+  }
   int x=fscanf(f,"#%d %d %d %d\n", &matrixProperties.fullMatrix_firstRow, &matrixProperties.fullMatrix_lastRow, &matrixProperties.fullMatrix_firstCol, &matrixProperties.fullMatrix_lastCol);
   matrixProperties.fullMatrix_size=max(matrixProperties.fullMatrix_lastRow,matrixProperties.fullMatrix_lastCol)+1;
   
@@ -627,6 +631,11 @@ void getMatrixSize(char *fn) {
 void readFullOMatrix(char *fn, UpperDiag<float> *mat, float *bias, bool setBias) {
   
   FILE *f=fopen(fn,"r");  
+  if (!f) {
+    fprintf(stderr,"Error: Can't open input file %s\n",fn);
+    exit(1);
+  }
+  
   char line[1000];
 
   double fullSum=0;
@@ -811,6 +820,10 @@ void computeTMatrix_mrf(UpperDiag<float> &O, UpperDiag<float> &OoverBias, UpperD
 
 void outputSparseMatrix(char *fn, UpperDiag<float> &T, float *bias) {
   FILE *out=fopen(fn,"w");
+  if (!out) {
+    fprintf(stderr,"Error: Can't open input file %s\n",fn);
+    exit(1);
+  }
   if (options.lastRow!=-1 && options.lastCol!=-1) fprintf(out,"# %d %d %d %d\n",options.firstRow,options.lastRow,options.firstCol,	    options.lastCol);
   else fprintf(out,"# %d %d %d %d\n",options.firstRow, options.lastRow, options.firstCol, options.lastCol);
 
