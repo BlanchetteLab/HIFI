@@ -36,19 +36,24 @@ The bam file linked just above comes from Rao et al. (2014), limited to intrachr
 
 ## Quick start
 1) Process bam file to produce input to HIFI (expected run time: 1 minute):
+
 ```src/BAMtoSparseMatrix.py examples/Rao_GM12878.hg19.chr9_example.bam examples/hg19.HindIII_fragments.bed ./examples_output```
 
 2) Run HIFI with default parameters (expected run time: 15 minutes):
+
 ``` src/HIFI examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.tsv examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.tsv -method=mrf```
 
 3) Extract a subset of the IF matrix for visualization (positions 125000000-129000000) (expected run time: 1 minute)
+
 ```python src/parseHIFIoutput.py examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.tsv examples/hg19.HindIII_fragments.bed 125000000 129000000 examples_output```
 
 4) Visualize the output IF matrix (expected run time: 15 minutes):
+
 ```python src/plotHIFIoutput.py examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.125000000_129000000.tsv examples/hg19.HindIII_fragments.bed 0.0 1.5 examples_output```
 
 ## Command line details:
 1) Processing of bam file
+
 ```
 BAMtoSparseMatrix.py [-h] bam_filepath digest_filepath output_dir
 
