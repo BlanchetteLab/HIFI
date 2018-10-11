@@ -655,9 +655,9 @@ void readFullOMatrix(char *fn, UpperDiag<float> *mat, float *bias, bool setBias)
     sscanf(line,"%f %s %d %s %d",&c,c1,&p1,c2,&p2);
     
     if (matrixProperties.chr1[0]==0) {strcpy(matrixProperties.chr1,c1);}
-    else { if (strcmp(c1,matrixProperties.chr1)) {fprintf(stderr,"ERROR: input file contains data from multiple chromosomes: %s and %s\n",matrixProperties.chr1, c1);exit(1);}}
+    else { if (strcmp(c1,matrixProperties.chr1)) {fprintf(stderr,"ERROR1: input file contains data from multiple chromosomes: %s and %s\n",matrixProperties.chr1, c1);exit(1);}}
     if (matrixProperties.chr2[0]==0) {strcpy(matrixProperties.chr2,c2);}
-    else { if (strcmp(c2,matrixProperties.chr2)) {fprintf(stderr,"ERROR: input file contains data from multiple chromosomes: %s and %s\n",matrixProperties.chr2, c2);exit(1);}}
+    else { if (strcmp(c2,matrixProperties.chr2)) {fprintf(stderr,"ERROR2: input file contains data from multiple chromosomes: %s and %s\n",matrixProperties.chr2, c2);exit(1);}}
     
     
     
@@ -846,7 +846,7 @@ void outputSparseBoundaryMatrix(char *fn, UpperDiag<char> &horizontalBoundary,Up
 
   for (int i=horizontalBoundary.startRow();i<horizontalBoundary.endRow();i++) {
     for (int j=horizontalBoundary.startCol(i)+1;j<horizontalBoundary.endCol(i)-1;j++){
-      if (horizontalBoundary.get(i,j) || (i!=0 && horizontalBoundary.get(i-1,j)) ||  verticalBoundary.get(i,j) || (j!=0 && verticalBoundary.get(i,j-1))) fprintf(out,"1 %s %d %s %d\n",matrixProperties.chr1,i+options.firstRow,matrixProperties.chr2,j+options.firstCol);
+      if (horizontalBoundary.get(i,j) || (i>horizontalBoundary.startRow() && horizontalBoundary.get(i-1,j)) ||  verticalBoundary.get(i,j) || (j>verticalBoundary.startCol(j) && verticalBoundary.get(i,j-1))) fprintf(out,"1 %s %d %s %d\n",matrixProperties.chr1,i+options.firstRow,matrixProperties.chr2,j+options.firstCol);
     }
   }
   fclose(out);
