@@ -49,14 +49,14 @@ class UpperDiag: public MyMatrix<T> {
 
   T get(int i, int j) {
     if (i>j || i<this->startRow() || i>=this->endRow() || j<this->startCol(i) || j>=this->endCol(i) || j-startCol(i)>this->bandSize) {
-      fprintf(stderr,"ERROR: Getting element outside matrix i=%d j=%d %d %d %d %d\n",i,j,this->startRow() , this->endRow(), this->startCol(i), this->endCol(i));exit(1);}
+      fprintf(stderr,"ERROR1: Getting element outside matrix i=%d j=%d %d %d %d %d\n",i,j,this->startRow() , this->endRow(), this->startCol(i), this->endCol(i));while(1);exit(1);}
     return this->data[i-this->firstRow][j-startCol(i)];
 
   }
 
   void set(int i, int j, T x) {
     if (i>j || i<this->startRow() || i>=this->endRow() || j<this->startCol(i) || j>=this->endCol(i) || j-startCol(i)>this->bandSize) {
-      fprintf(stderr,"ERROR: Setting element outside matrix i=%d j=%d %d %d %d %d\n",i,j,this->startRow() , this->endRow(), this->startCol(i), this->endCol(i));exit(1);}
+      fprintf(stderr,"ERROR2: Setting element outside matrix i=%d j=%d %d %d %d %d\n",i,j,this->startRow() , this->endRow(), this->startCol(i), this->endCol(i));while(1);exit(1);}
     this->data[i-this->firstRow][j-startCol(i)]=x;
   }                                                                                                                                         
   void clear() {                                                                                                                           for (int i=this->firstRow;i<=this->lastRow;i++) {                                                                                        free(this->data[i-this->firstRow]);
