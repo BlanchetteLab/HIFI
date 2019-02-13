@@ -102,6 +102,7 @@ MRF options
 	-mrfMaxIter=<INTEGER> : Number of iterations of MRF. Default: 5
 	-sigmaMultiplier=<FLOAT> : Sigma multiplier term in MRF (see Methods). Default: 0.040000
 	-minSigma=<FLOAT> : Minimum value of sigma to be considered (see Methods). Default: 0.001000
+	-varianceMultiplier=<FLOAT> : Models observed read count as a negative binomial distribution instead of a Poisson distribution, with mean equal to the estimated IF, and variance equal to mean*varianceMultiplier. Default: 1
 
 Output options
 	-minOutput=<FLOAT> : Smallest IF value to be outputed. IF values below this number are not outputed. Defaul: 0.000010
