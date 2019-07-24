@@ -114,6 +114,9 @@ Subsetting options
 	-firstCol=<INTEGER> : First column to be analyzed
 	-lastCol=<INTEGER> : Last column to be analyzed
 
+Normalization options
+	-userNormalization=<FILENAME> : File name of file containing per-cell bias normalization coefficients
+
 Optimizations
 	-bandSize=<INTEGER> : Limits the analysis to a band of the given width along the main diagonal. Useful when analyzing very large matrices, to limit the analysis to short range contacts. Default: inactive
 ```
