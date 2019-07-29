@@ -40,6 +40,8 @@ class HIFI_options {
   int lastRow;
   int lastCol;
 
+  // user-define normalization matrix
+  char normalizationMatrix[1000];
 
   
   HIFI_options() {
@@ -63,6 +65,7 @@ class HIFI_options {
     lastRow=-1;
     lastCol=-1;
     bandSize=99999999;
+    normalizationMatrix[0]=0;
   }
 
   void read(int argc, char *argv[]);

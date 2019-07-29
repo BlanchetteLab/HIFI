@@ -11,11 +11,12 @@
 #include "HIFI_MyMatrix.h"
 
 using namespace std;
-using namespace __gnu_cxx;
+//using namespace __gnu_cxx;
  
 HIFI_options options;
 HIFI_matrixProperties matrixProperties;
 
+UpperDiag<float> biasMatrix;
 
 double *precomputedNormPDF;
 double *precomputedNormLogPDF;
@@ -24,6 +25,7 @@ double *precomputedNormLogPDF;
 int fullRange=100*NORM_RES;
 int floatFullRange=2*100*NORM_RES;
 
+float *bias;
 
 float normpdf(float x, float m, float s) {
   int i=((x-m)/s)*NORM_RES + fullRange;
@@ -192,13 +194,20 @@ void setBoundaries(UpperDiag<float> &OoverBias, UpperDiag<char> &horizontalBound
 
 }
 
-void computeOoverBias(UpperDiag<float> &O, UpperDiag<float> &OoverBias, float *bias) {
+float getBias(int i, int j) {
+  if (options.normalizationMatrix[0]) {
+    return biasMatrix.get(i,j);
+  }
+  return bias[i]*bias[j];
+}
+
+void computeOoverBias(UpperDiag<float> &O, UpperDiag<float> &OoverBias) {
   // precomputing OoverBias matrix                                                                                                         
 
   for (int i=O.startRow();i<O.endRow();i++) {
     for (int j=O.startCol(i);j<O.endCol(i);j++) {
       int x=O.get(i,j);
-      if (x>0) OoverBias.set(i,j,x/(bias[i]*bias[j]));
+      if (x>0) OoverBias.set(i,j,x/getBias(i,j));
     }
   }
 }
@@ -500,7 +509,7 @@ double evaluateLikelihood(float currentT, int obs, float medNei, float bias) {
 }
 
 
-double evaluateFullLikelihood(UpperDiag<float> &O, UpperDiag<float> &T, UpperDiag<char> &horizontalBoundaries, UpperDiag<char> &verticalBoundaries, float *bias) {
+double evaluateFullLikelihood(UpperDiag<float> &O, UpperDiag<float> &T, UpperDiag<char> &horizontalBoundaries, UpperDiag<char> &verticalBoundaries) {
   double like=0;
   
   for (int i=O.startRow();i<O.endRow();i++) {
@@ -509,14 +518,14 @@ double evaluateFullLikelihood(UpperDiag<float> &O, UpperDiag<float> &T, UpperDia
       float medianNeighbor=getMedianNeighbor(T, horizontalBoundaries, verticalBoundaries, i,j);
       float t=T.get(i,j);
       int o=O.get(i,j);
-      double l=evaluateLikelihood(t, o, medianNeighbor,bias[i]*bias[j]);
+      double l=evaluateLikelihood(t, o, medianNeighbor,getBias(i,j));
       like+=l;
     }
   }
   return like;
 }
 
-double evaluateFullLikelihoodPatch(UpperDiag<float> &O, UpperDiag<float> &T, UpperDiag<char> &horizontalBoundaries, UpperDiag<char> &verticalBoundaries, float *bias, int ii, int jj) {
+double evaluateFullLikelihoodPatch(UpperDiag<float> &O, UpperDiag<float> &T, UpperDiag<char> &horizontalBoundaries, UpperDiag<char> &verticalBoundaries, int ii, int jj) {
   double like=0;
   
   for (int i=max(O.startRow(),ii-1);i<min(O.endRow(),ii+2);i++) {
@@ -525,7 +534,7 @@ double evaluateFullLikelihoodPatch(UpperDiag<float> &O, UpperDiag<float> &T, Upp
       float medianNeighbor=getMedianNeighbor(T, horizontalBoundaries, verticalBoundaries, i,j);
       float t=T.get(i,j);
       int o=O.get(i,j);
-      double l=evaluateLikelihood(t, o, medianNeighbor,bias[i]*bias[j]);
+      double l=evaluateLikelihood(t, o, medianNeighbor,getBias(i,j));
       like+=l;
     }
   }
@@ -539,15 +548,14 @@ float logFactor[NFACTORS];
 
 // returns optimal choice of value for an entry in T, given the number of reads observed (obs) and the median of the neighborhood 
 
-double optimizeTnew(UpperDiag<float> &O, UpperDiag<float> &T, UpperDiag<char> horizontalBoundaries, UpperDiag<char> verticalBoundaries, float *bias, int i, int j, int obs, float medNei, float localbias) {
+double optimizeTnew(UpperDiag<float> &O, UpperDiag<float> &T, UpperDiag<char> horizontalBoundaries, UpperDiag<char> verticalBoundaries,  int i, int j, int obs, float medNei, float localbias) {
   
   // search for the best multiplicative factor to apply to currenT
   float loglike[NFACTORS];
   float old=T.get(i,j);
   for (int f=0;f<NFACTORS;f++) {
     T.set(i,j,old*factor[f]);
-    loglike[f]=evaluateFullLikelihoodPatch(O, T, horizontalBoundaries, verticalBoundaries, bias, i,j);
-    //loglike[f]=evaluateLikelihood(T.get(i,j), O.get(i,j), medNei, localbias);
+    loglike[f]=evaluateFullLikelihoodPatch(O, T, horizontalBoundaries, verticalBoundaries,  i,j);
   }
   T.set(i,j,old);
   // select best factor
@@ -685,7 +693,51 @@ void readFullOMatrix(char *fn, UpperDiag<float> *mat, float *bias, bool setBias)
   }
 }
 
+
+
+void readBiasMatrix(char *fn, UpperDiag<float> *mat) {
   
+  FILE *f=fopen(fn,"r");  
+  if (!f) {
+    fprintf(stderr,"Error: Can't open input file %s\n",fn);
+    exit(1);
+  }
+  
+  char line[1000];
+
+  // initialize bias to 1
+  for (int i=mat->startRow();i<mat->endRow();i++) {
+    for (int j=mat->startCol(i)+1;j<mat->endCol(i);j++) {
+      mat->set(i,j,1);
+    }
+  }
+
+  
+  while (fscanf(f,"%[^\n]\n",line)!=EOF) {
+    if (line[0]=='#') continue;
+    int foo;
+    int p1,p2;
+    float c;
+    char c1[100];
+    char c2[100];
+    sscanf(line,"%f %s %d %s %d",&c,c1,&p1,c2,&p2);
+    if (strcmp(c1,matrixProperties.chr1)) {fprintf(stderr,"ERROR1: Chromosome mismatch: %s and %s\n",matrixProperties.chr1, c1);exit(1);}
+    if (strcmp(c2,matrixProperties.chr2)) {fprintf(stderr,"ERROR2: Chromosome mismatch: %s and %s\n",matrixProperties.chr2, c2);exit(1);}
+    
+    if (abs(p2-p1)<options.bandSize) {
+      if (options.lastRow==-1 || (p1>=options.firstRow && p1<=options.lastRow && p2>=options.firstCol && p2<=options.lastCol))
+	{
+	  if (p1<options.firstRow || p1>options.lastRow) continue;
+	  if (p2<options.firstCol || p1>options.lastCol) continue;
+	  mat->set(p1,p2,c);
+	}
+    }
+  }
+
+  fclose(f);
+}
+
+
 
 void computeTMatrix_fixed(UpperDiag<float> &O, UpperDiag<float> &T, float *bias) {
   float *sumRow=(float*)malloc(O.endRow()*sizeof(float));
@@ -727,7 +779,7 @@ void computeTMatrix_fixed(UpperDiag<float> &O, UpperDiag<float> &T, float *bias)
   }
   for (int i=O.startRow();i<O.endRow();i++) {
     for (int j=O.startCol(i);j<O.endCol(i);j++) {
-      T.set(i,j,T.get(i,j)/(bias[i]*bias[j]));
+      T.set(i,j,T.get(i,j)/getBias(i,j));
     }
   }
 }
@@ -780,7 +832,7 @@ void computeTMatrix_mrf(UpperDiag<float> &O, UpperDiag<float> &OoverBias, UpperD
 
 	    float medianNeighbor=getMedianNeighbor(T, horizontalBoundaries, verticalBoundaries, i,j);
 	    int o=O.get(i,j);
-	    float newT=optimizeTnew(O, T, horizontalBoundaries, verticalBoundaries, bias, i,j, o, medianNeighbor,bias[i]*bias[j]);
+	    float newT=optimizeTnew(O, T, horizontalBoundaries, verticalBoundaries, i,j, o, medianNeighbor,getBias(i,j));
 	    Ttemp.set(i,j,newT);
 	  }
       }
@@ -806,7 +858,7 @@ void computeTMatrix_mrf(UpperDiag<float> &O, UpperDiag<float> &OoverBias, UpperD
     
     fprintf(stderr,"rep=%d: nChanges=%ld, sumCHanges=%lf\n",rep, nChanges,sumChanges);
     fflush(stderr);
-    fprintf(stderr,"After re-estimation Likelihood: %lf\n",evaluateFullLikelihood(O, T, horizontalBoundaries, verticalBoundaries, bias));
+    fprintf(stderr,"After re-estimation Likelihood: %lf\n",evaluateFullLikelihood(O, T, horizontalBoundaries, verticalBoundaries));
 
   } // end of MRF iteration loop
   
@@ -831,7 +883,7 @@ void outputSparseMatrix(char *fn, UpperDiag<float> &T, float *bias) {
 
     for (int j=T.startCol(i);j<T.endCol(i);j++){
       float x=T.get(i,j);
-      if (!options.outputNormalized) x*=(bias[i]*bias[j]);
+      if (!options.outputNormalized) x*=getBias(i,j);
       if (x>options.minOutput) fprintf(out,"%5.3lf %s %d %s %d\n",x/options.minOutput,matrixProperties.chr1,i,matrixProperties.chr2,j);
     }
   }
@@ -866,7 +918,8 @@ int main(int argc, char *argv[]) {
   UpperDiag<float> O; 
   UpperDiag<float> OoverBias; 
   UpperDiag<float> T; 
-  
+
+
   options.read(argc, argv);
   options.print();
 
@@ -879,12 +932,17 @@ int main(int argc, char *argv[]) {
   O = UpperDiag<float>(options.firstRow,options.firstCol,options.lastRow,options.lastCol, options.bandSize);
   OoverBias = UpperDiag<float>(options.firstRow,options.firstCol,options.lastRow,options.lastCol, options.bandSize);
   
-  float *bias=(float*) malloc(matrixProperties.fullMatrix_size*sizeof(float));
+  bias=(float*) malloc(matrixProperties.fullMatrix_size*sizeof(float));
   for (int i=0;i<matrixProperties.fullMatrix_size;i++) bias[i]=1;
 
   fprintf(stderr,"Reading matrix\n");
   readFullOMatrix(argv[1], &O, bias, true);
-  computeOoverBias(O,OoverBias, bias);
+  if (options.normalizationMatrix[0]) {
+    biasMatrix = UpperDiag<float>(options.firstRow,options.firstCol,options.lastRow,options.lastCol, options.bandSize);
+    readBiasMatrix(options.normalizationMatrix,&biasMatrix);
+  }
+  
+  computeOoverBias(O,OoverBias);
   if (options.method_fixed) computeTMatrix_fixed(O, T, bias);
   if (options.method_kde || options.method_akde)  computeTMatrix_kde(O, OoverBias, T);
   if (options.method_mrf) computeTMatrix_mrf(O, OoverBias, T, bias);

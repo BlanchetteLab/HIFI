@@ -35,6 +35,7 @@ void HIFI_options::read(int argc, char *argv[]) {
     if (strstr(argv[i],"-minSigma=")) {int x=sscanf(argv[i],"-minSigma=%lf",&minSigma); if (x!=1) {fprintf(stderr,"Error: Can't read %s\n",argv[i]);} ; continue;}
     if (strstr(argv[i],"-sigmaMultiplier=")) {int x=sscanf(argv[i],"-sigmaMultiplier=%lf",&sigmaMultiplier); if (x!=1) {fprintf(stderr,"Error: Can't read %s\n",argv[i]);} ; continue;}
     if (strstr(argv[i],"-bandSize=")) {int x=sscanf(argv[i],"-bandSize=%d",&bandSize); if (x!=1) {fprintf(stderr,"Error: Can't read %s\n",argv[i]);} ; continue;}
+    if (strstr(argv[i],"-normalizationMatrix=")) {int x=sscanf(argv[i],"-normalizationMatrix=%s",normalizationMatrix); if (x!=1) {fprintf(stderr,"Error: Can't read %s\n",argv[i]);} ; continue;}
 
     fprintf(stderr,"Unknown option: %s\n",argv[i]);
     exit(1);
