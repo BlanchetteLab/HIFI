@@ -17,9 +17,10 @@ Output: Estimated interaction frequency matrix at RF resolution
 
 ## Software requirements
 1) Linux with g++ compiler
-2) Samtools: http://www.htslib.org/download/
-3) Matplotlib (should be installed with most versions of Python; or can be installed using Anaconda (https://conda.io/docs/user-guide/install/download.html)).
-4) NumPy (should be installed with most versions of Python; or can be installed using Anaconda (https://conda.io/docs/user-guide/install/download.html)).
+2) SAMtools: http://www.htslib.org/download/
+3) Python v2.7 interpreter: https://www.anaconda.com/distribution/ 
+4) Matplotlib (should be installed with most versions of Python; or can be installed using Anaconda (https://conda.io/docs/user-guide/install/download.html)).
+5) NumPy (should be installed with most versions of Python; or can be installed using Anaconda (https://conda.io/docs/user-guide/install/download.html)).
 
 ## Installation guide
 Installation is expected to take a few minutes:
