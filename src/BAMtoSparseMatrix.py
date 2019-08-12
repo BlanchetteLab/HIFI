@@ -134,20 +134,26 @@ output_directory=os.path.join(args.output_dir,"")
 if(not os.path.exists(output_directory)):
     os.makedirs(output_directory)
     
+output = ["b;ahb;ahs"]
 output_prefix=os.path.join(args.output_dir,basename)
 date_stamp="_".join(re.split("\W+|:|\.",str(datetime.datetime.now()))[:-1])
 LOG_filepath=output_directory+basename+".BAMtoSparseMatrix."+date_stamp+".log"
 with open(LOG_filepath,"w") as LOG:
-    LOG.write("#  Log file for BAMtoSparseMatrix v1.01 (author: Christopher JF Cameron)\n\n")
+    LOG.write("#  Log file for BAMtoSparseMatrix v1.03 (author: Christopher JF Cameron)\n\n")
     print >> sys.stderr,("Converting '"+basename+"' to temporary chromosome interaction files ..."),
+    #   remove old tmp files from output directory
+    for filepath in glob.glob(''.join([output_prefix,"*.tmp"])):
+        os.remove(filepath)
     #   convert BAM to SAM and split by chr_A and chr_B interactions
     convert_process=subprocess.Popen([samtools_exe,"view",args.bam_filepath],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-    split_process=subprocess.Popen(["awk","-F","\t","{ID_A=$1; chr_A=$3; start_A=$4; getline; ID_B=$1; chr_B=$3; start_B=$4; if(ID_A!=ID_B){print \"Error - BAM read pairs are not sequential (Stopping)\"; exit} if(chr_A>chr_B){tmp_chr=chr_A; tmp_start=start_A; chr_A=chr_B; start_A=start_B; chr_B=tmp_chr; start_B=tmp_start} print ID_A,chr_A,start_A,chr_B,start_B > \""+output_prefix+".\"chr_A\"_\"chr_B\".tmp\"}"],stdin=convert_process.stdout,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    split_process=subprocess.Popen(["awk","-F","\t","{ID_A=$1; chr_A=$3; start_A=$4; getline; ID_B=$1; chr_B=$3; start_B=$4; if(ID_A!=ID_B){print \"Error - BAM read pairs are not sequential (Stopping)\"; exit} if(chr_A>chr_B){tmp_chr=chr_A; tmp_start=start_A; chr_A=chr_B; start_A=start_B; chr_B=tmp_chr; start_B=tmp_start} filename=\""+output_prefix+".\"chr_A\"_\"chr_B\".tmp\"; print ID_A,chr_A,start_A,chr_B,start_B > filename}"],stdin=convert_process.stdout,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     output=split_process.communicate()[0].rstrip().split("\n") #   wait for samtools and awk to finish before proceeding with Python script
-    if(output==['']):  
+    if(len(glob.glob(''.join([output_prefix,"*.tmp"]))) > 0):  
         print >> sys.stderr, ("Done")
     else:   #   problem encountered while parsing BAM file
-        print "\n".join(output)
+        print " Error - BAM file was not processed correctly. Please check that SAMtools and awk are installed correctly (and work). See examples of called SAMtools and awk commands below:"
+        print '\n'.join([' '.join(["\nSAMtools command (should print the first ten lines of the BAM to stdout):\n\t",samtools_exe,"view",args.bam_filepath,'|',"head"]),' '.join(["\nSAMtools+awk command (should create sparse matrix files):\n\t",samtools_exe,"view",args.bam_filepath,'|',"awk","-F","\'\\t\'","\'{ID_A=$1; chr_A=$3; start_A=$4; getline; ID_B=$1; chr_B=$3; start_B=$4; if(ID_A!=ID_B){print \"Error - BAM read pairs are not sequential (Stopping)\"; exit} if(chr_A>chr_B){tmp_chr=chr_A; tmp_start=start_A; chr_A=chr_B; start_A=start_B; chr_B=tmp_chr; start_B=tmp_start} filename=\""+output_prefix+".\"chr_A\"_\"chr_B\".tmp\"; print ID_A,chr_A,start_A,chr_B,start_B > filename}\'"])])
+        sys.exit()
     LOG.write("BAM TO SAM CONVERSION COMPLETE\n\n")
 
     #   get list of temporary chromosome files from
