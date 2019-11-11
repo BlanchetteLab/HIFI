@@ -54,6 +54,10 @@ The BAM file linked just above comes from Rao et al. (2014), limited to intrachr
 
 ```python src/plotHIFIoutput.py examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.125000000_129000000.tsv examples/hg19.HindIII_fragments.bed 0.0 1.5 examples_output```
 
+5) Bin the output IF matrix to 25 kb canonical fixed bins (expected run time: <5 minutes):
+
+```python src/SparseToFixed.py GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.125000000_129000000.tsv examples/hg19.HindIII_fragments.bed 25000 exmaples_output/GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.125000000_129000000.25kb.tsv```
+
 ## Command line details:
 1) Processing of BAM file
 
