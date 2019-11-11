@@ -5,15 +5,17 @@ A tool for high-resolution estimation of DNA-DNA interaction frequency from Hi-C
 HIFI is a set of tools to infer true intra-chromosomal interaction frequencies at restriction fragment (RF) resolution from Hi-C data. 
 It uses adaptive kernel density estimation and Markov Random Field approaches to provide accurate estimates of interaction frequency matrices from sparse read-count matrices.
 
-Input: A bam file corresponding to Hi-C data from a given chromosome (or part thereof). 
+Input: A BAM file corresponding to Hi-C data from a given chromosome (or part thereof). 
 
 Step 1: Produce a RF-resolution read count matrix, using the BAMtoSparseMatrix.py program.
 
 Step 2: Produce the RF-resolution true IF estimation, using the HIFI program.
 
-Step 3: (optional) Visualize the inferred true IF matrix, using the parseHIFIoutput.py and plotHIFIoutput.py program. 
+Step 3: (optional) Visualize the inferred true IF matrix, using the parseHIFIoutput.py and plotHIFIoutput.py program.
 
-Output: Estimated interaction frequency matrix at RF resolution
+Step 4: (optional) Convert RF resolution matrix to canonical fixed-binning matrix, using the SparseToFixed.py program. 
+
+Default output: estimated interaction frequency matrix at RF resolution
 
 ## Software requirements
 1) Linux with g++ compiler
@@ -33,10 +35,10 @@ Installation is expected to take a few minutes:
 6) Download into the examples directory the following test Hi-C data set from Rao et al. 2014: https://www.cs.mcgill.ca/~blanchem/HIFI/Rao_GM12878.hg19.chr9_example.bam
 
 ## Example data set
-The bam file linked just above comes from Rao et al. (2014), limited to intrachromosomal contacts in region chr9:122000000-132000000. This is the data we are going to use as example. The bam file was produced from fastq files using HiCUP's standard pipeline to map read pairs to hg19 and perform read-pair quality filtering. Additional filtering (MAPQ value >= 30) ensures unique mappability. 
+The BAM file linked just above comes from Rao et al. (2014), limited to intrachromosomal contacts in region chr9:122000000-132000000. This is the data we are going to use as example. The BAM file was produced from fastq files using HiCUP's standard pipeline to map read pairs to hg19 and perform read-pair quality filtering. Additional filtering (MAPQ value >= 30) ensures unique mappability. 
 
 ## Quick start
-1) Process bam file to produce input to HIFI (expected run time: 1 minute):
+1) Process BAM file to produce input to HIFI (expected run time: 1 minute):
 
 ```src/BAMtoSparseMatrix.py examples/Rao_GM12878.hg19.chr9_example.bam examples/hg19.HindIII_fragments.bed ./examples_output```
 
@@ -53,7 +55,7 @@ The bam file linked just above comes from Rao et al. (2014), limited to intrachr
 ```python src/plotHIFIoutput.py examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.125000000_129000000.tsv examples/hg19.HindIII_fragments.bed 0.0 1.5 examples_output```
 
 ## Command line details:
-1) Processing of bam file
+1) Processing of BAM file
 
 ```
 BAMtoSparseMatrix.py [-h] bam_filepath digest_filepath output_dir
@@ -153,6 +155,26 @@ positional arguments:
 
 optional arguments:
   -h, --help       show this help message and exit
+```
+
+5) Convert IF matrix from RF to fixed-binning resolution
+```
+usage: SparseToFixed.py [-h] [--start] [--no_score]
+                        sparse_matrix_filepath digest_filepath resolution
+                        output_filepath
+
+positional arguments:
+  sparse_matrix_filepath
+                        input sparse matrix file path
+  digest_filepath       expected restriction fragment digest file (BED-like)
+                        path
+  resolution            fixed binning resolution (must be an integer)
+  output_filepath       output (fixed bins) sparse matrix file path
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --start               use fragment start instead of end when binning
+  --no_score            output Juicebox 'short format'
 ```
 
 ## Testing
