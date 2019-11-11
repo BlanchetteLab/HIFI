@@ -92,7 +92,6 @@ else:
     row_min,row_max,col_min,col_max = get_matrix_dimensions(args.sparse_matrix_filepath)
     FILE.seek(0)
 float_16 = False
-total = np.float64(0.0)
 for i,line in enumerate(FILE):
     try: freq,row_chrom,row,col_chrom,col = line.rstrip().split()
     except ValueError: print "Error - sparse matrix file is not in the expected format"
@@ -124,16 +123,18 @@ for i,line in enumerate(FILE):
         #n = abs(row_max-row_min)+1
         #m = abs(col_max-col_min)+1
         try: 
-            matrix = np.zeros((n,m),dtype=np.float32)
+            matrix = np.zeros((n,m),dtype=np.float64)
+            total = np.float64(0.0)
         except MemoryError:
-            print >> sys.stderr,("Warning - not enough available memory to allocate for a matrix of datatype 'np.float32'. Trying 'np.float16' instead."),
+            print >> sys.stderr,("Warning - not enough available memory to allocate for a matrix of datatype 'np.float64'. Trying 'np.float16' instead. Expect a loss of precision in matrix values."),
             matrix = np.zeros((n,m),dtype=np.float16)
             float_16 = True
+            total = np.float16(0.0)
         print >> sys.stderr,("done")
 
         print >> sys.stderr,(''.join(["Parsing sparse matrix file ... "])),
     
-    freq = np.float16(freq) if float_16 else np.float32(freq)
+    freq = np.float16(freq) if float_16 else np.float64(freq)
     total += freq
     row,col = int(row),int(col)
     if col < row:
@@ -147,7 +148,7 @@ for i,line in enumerate(FILE):
     col = (fend_dict[col_chrom][col]//args.resolution)
     matrix[row,col] += freq
 FILE.close()
-assert(total == np.sum(matrix,dtype=np.float64)),"Error - matrix sum does not equal input frequency sum"
+assert(np.isclose(total,np.sum(matrix,dtype=np.float64))),"Error - matrix sum does not equal input frequency sum"
 print >> sys.stderr,("done")
 
 ### print number of reads lost by ignoring the main diagonal
