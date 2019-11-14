@@ -15,7 +15,8 @@ Step 3: (optional) Visualize the inferred true IF matrix, using the parseHIFIout
 
 Step 4: (optional) Convert RF resolution matrix to canonical fixed-binning matrix, using the SparseToFixed.py program. 
 
-Default output: estimated interaction frequency matrix at RF resolution
+Step 5: (optional) Call loops using the callPeaks program.
+
 
 ## Software requirements
 1) Linux with g++ compiler
@@ -30,9 +31,10 @@ Installation is expected to take a few minutes:
 1) Either download the package by clicking the "Clone or download" button, unziping file in desired location, and renaming the directory "HIFI"   OR   Use the command line ``` git clone https://github.com/BlanchetteLab/HIFI ```.
 2) ``` cd HIFI ```
 3) ``` make HIFI ```
-4) If Matplotlib or NumPy are not installed, install it using Anaconda (https://conda.io/docs/user-guide/install/download.html).
-5) If samtools is not installed, install it (http://www.htslib.org/download/) and make sure the samtools executable is in your path.
-6) Download into the examples directory the following test Hi-C data set from Rao et al. 2014: https://www.cs.mcgill.ca/~blanchem/HIFI/Rao_GM12878.hg19.chr9_example.bam
+4) ``` make callPeaks ```
+5) If Matplotlib or NumPy are not installed, install it using Anaconda (https://conda.io/docs/user-guide/install/download.html).
+6) If samtools is not installed, install it (http://www.htslib.org/download/) and make sure the samtools executable is in your path.
+7) Download into the examples directory the following test Hi-C data set from Rao et al. 2014: https://www.cs.mcgill.ca/~blanchem/HIFI/Rao_GM12878.hg19.chr9_example.bam
 
 ## Example data set
 The BAM file linked just above comes from Rao et al. (2014), limited to intrachromosomal contacts in region chr9:122000000-132000000. This is the data we are going to use as example. The BAM file was produced from fastq files using HiCUP's standard pipeline to map read pairs to hg19 and perform read-pair quality filtering. Additional filtering (MAPQ value >= 30) ensures unique mappability. 
@@ -44,7 +46,7 @@ The BAM file linked just above comes from Rao et al. (2014), limited to intrachr
 
 2) Run HIFI with default parameters (expected run time: 15 minutes):
 
-``` src/HIFI examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.tsv examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.tsv -method=mrf```
+``` bin/HIFI examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.tsv examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.tsv -method=mrf```
 
 3) Extract a subset of the IF matrix for visualization (positions 125000000-129000000) (expected run time: 1 minute)
 
@@ -57,6 +59,9 @@ The BAM file linked just above comes from Rao et al. (2014), limited to intrachr
 5) Bin the output IF matrix to 25 kb canonical fixed bins (expected run time: <5 minutes):
 
 ```python src/SparseToFixed.py GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.125000000_129000000.tsv examples/hg19.HindIII_fragments.bed 25000 exmaples_output/GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.125000000_129000000.25kb.tsv```
+
+6) Call loops using callPeaks (expected run time: 2 minutes):
+``` bin/callPeaks examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.tsv 50000 100000 chr9 examples/hg19.HindIII_fragments.bed 20000 ```
 
 ## Command line details:
 1) Processing of BAM file
@@ -180,6 +185,25 @@ optional arguments:
   --start               use fragment start instead of end when binning
   --no_score            output Juicebox 'short format'
 ```
+
+5) Call loops on HIFI-smoothed IF matrices
+```
+usage: callPeaks <interactionFrequencyFile.tsv> <peakSize> <windowSize> <chromosome> <restrictionEnzymeCutSites.bed> <mergeDistance>
+
+positional arguments:
+  interactionFrequencyFile.tsv
+                        input HIFI-processed IF matrix for one chromosome
+  peakSize              Size of region to call peaks (recommendation: 50000)
+  windowSize            Size of window surrouding peak (recommendation: 2*peakSize)
+  chromosome            chromosome identifier (e.g. chr9)              
+  restrictionEnzymeCutSites.bed            
+                        Position of cut sites
+  mergeDist             Distance within which to merge called peaks.
+
+Output:
+  List of fragment pairs involved in loops, with score, in bedpe format. 
+```
+
 
 ## Testing
 All software was tested on Linux Ubuntu 12.04.5 LTS (GNU/Linux 3.2.0-86-generic x86_64).
