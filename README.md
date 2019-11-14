@@ -46,7 +46,7 @@ The BAM file linked just above comes from Rao et al. (2014), limited to intrachr
 
 2) Run HIFI with default parameters (expected run time: 15 minutes):
 
-``` bin/HIFI examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.tsv examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.tsv -method=mrf```
+``` src/HIFI examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.tsv examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.tsv -method=mrf```
 
 3) Extract a subset of the IF matrix for visualization (positions 125000000-129000000) (expected run time: 1 minute)
 
@@ -61,7 +61,7 @@ The BAM file linked just above comes from Rao et al. (2014), limited to intrachr
 ```python src/SparseToFixed.py GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.125000000_129000000.tsv examples/hg19.HindIII_fragments.bed 25000 exmaples_output/GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.125000000_129000000.25kb.tsv```
 
 6) Call loops using callPeaks (expected run time: 2 minutes):
-``` bin/callPeaks examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.tsv 50000 100000 chr9 examples/hg19.HindIII_fragments.bed 20000 ```
+``` src/callPeaks examples_output/Rao_GM12878.hg19.chr9_example.chr9_chr9.RF.HIFI_MRF.tsv 50000 100000 chr9 examples/hg19.HindIII_fragments.bed 20000 ```
 
 ## Command line details:
 1) Processing of BAM file
