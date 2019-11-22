@@ -360,7 +360,8 @@ int main(int argc, char *argv[]) {
 	      }	  
 	    }
 	  }
-	  sprintf(out,"%s\t%d\t%d\t%s\t%d\t%d\t%f\t%f\t.\t.\t0,0,0\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",chr,RF_end[maxi_i],RF_end[maxi_i]+1,chr,RF_end[maxi_j], RF_end[maxi_j]+1,ratio_peak,scores.get(i,j),m[maxi_i][maxi_j],mE.get(maxi_i,maxi_j),ratio_bl,ratio_donut,ratio_hor,ratio_ver,ratio_peak/ratio_bl,ratio_peak/ratio_donut,ratio_peak/ratio_hor,ratio_peak/ratio_ver, i, j, l_window, r_window,t_window,b_window,l_peak,r_peak,t_peak,b_peak,peak_n,donut_n);
+//	  sprintf(out,"%s\t%d\t%d\t%s\t%d\t%d\t%f\t%f\t.\t.\t0,0,0\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",chr,RF_end[maxi_i],RF_end[maxi_i]+1,chr,RF_end[maxi_j], RF_end[maxi_j]+1,ratio_peak,scores.get(i,j),m[maxi_i][maxi_j],mE.get(maxi_i,maxi_j),ratio_bl,ratio_donut,ratio_hor,ratio_ver,ratio_peak/ratio_bl,ratio_peak/ratio_donut,ratio_peak/ratio_hor,ratio_peak/ratio_ver, i, j, l_window, r_window,t_window,b_window,l_peak,r_peak,t_peak,b_peak,peak_n,donut_n);
+	  sprintf(out,"%s\t%d\t%d\t%s\t%d\t%d\t%f\n",chr,RF_end[maxi_i],RF_end[maxi_i]+1,chr,RF_end[maxi_j], RF_end[maxi_j]+1,scores.get(i,j));
 	  output[i][j]=out;
 	}
 	else {
