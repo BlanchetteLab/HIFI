@@ -118,7 +118,7 @@ MRF options
 
 Output options
 	-minOutput=<FLOAT> : Smallest IF value to be outputed. IF values below this number are not outputed. Defaul: 0.000010
-	-outputNotNormalized : Does not output bias-corrected IFs, but instead produces non-bias-corrected IFs.
+	-outputNormalized : Outputs bias-corrected IFs.
 
 Subsetting options
 	-firstRow=<INTEGER> : First row to be analyzed
