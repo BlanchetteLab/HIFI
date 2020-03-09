@@ -344,7 +344,7 @@ int main(int argc, char *argv[]) {
 	double score=min4(ratio_peak/ratio_donut,ratio_peak/ratio_hor,ratio_peak/ratio_ver,ratio_peak/ratio_bl);
 	scores.set(i,j,score);
 
-	if (score>-minScore && ratio_peak>=1 &&  donut_n>=donutSize && hor_n>=1 && ver_n>=1 && bl_n>=1 && peak_n>=peakSize ) {
+	if (score>=minScore && ratio_peak>=1 &&  donut_n>=donutSize && hor_n>=1 && ver_n>=1 && bl_n>=1 && peak_n>=peakSize ) {
 	  
 	  valid[i][j]=1;
 	  char *out=(char*) malloc(400);
