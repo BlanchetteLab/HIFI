@@ -204,9 +204,13 @@ Output:
   List of fragment pairs involved in loops, with score, in bedpe format. 
 ```
 
-
 ## Testing
 All software was tested on Linux Ubuntu 12.04.5 LTS (GNU/Linux 3.2.0-86-generic x86_64).
+
+## Citing HIFI
+If HIFI was used in your analysis, please cite:
+
+Cameron, C.J.F., Dostie, J. and Blanchette, M. (2020) HIFI: estimating DNA-DNA interaction frequency from Hi-C data at restriction-fragment resolution. _Genome Biol_  **21**, 11. doi: https://doi.org/10.1186/s13059-019-1913-y
 
 ## License:
 HIFI is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation.
