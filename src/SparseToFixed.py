@@ -139,15 +139,18 @@ for i,line in enumerate(FILE):
     row,col = int(row),int(col)
     if col < row:
         print "Warning - lower triangle entries of the matrix have been encountered and will be ignored"
+        total -= freq
         continue 
     elif col == row:
         print "Warning - main diagonal entries of the matrix have been encountered and will be ignored"
+        total -= freq
         continue
     #   bin interaction values
-    row = (fend_dict[row_chrom][row]//args.resolution)  #   subtract min row/col to get correct matrix index
+    row = (fend_dict[row_chrom][row]//args.resolution)
     col = (fend_dict[col_chrom][col]//args.resolution)
     matrix[row,col] += freq
 FILE.close()
+
 assert(np.isclose(total,np.sum(matrix,dtype=np.float64))),"Error - matrix sum does not equal input frequency sum"
 print >> sys.stderr,("done")
 
