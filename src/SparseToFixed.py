@@ -91,6 +91,8 @@ else:
     print "Warning - header not found in sparse matrix file. Parsing file to determine dimensions."
     row_min,row_max,col_min,col_max = get_matrix_dimensions(args.sparse_matrix_filepath)
     FILE.seek(0)
+
+cis = False
 float_16 = False
 for i,line in enumerate(FILE):
     try: freq,row_chrom,row,col_chrom,col = line.rstrip().split()
@@ -113,10 +115,13 @@ for i,line in enumerate(FILE):
             print >> sys.stderr,("done")
         if unknown_chrom:
             continue
+        if row_chrom == col_chrom:
+            cis = True
             
         print >> sys.stderr,(''.join(["Initializing frequncy matrix ... "])),
         #   initialize fixed binned matrix
-        max_val = max(fend_dict[row_chrom][val]//args.resolution for val in [row_max,col_max])
+        max_val = max(fend_dict[row_chrom][row_max]//args.resolution,
+            fend_dict[col_chrom][col_max]//args.resolution)
         n = m = max_val+1
         #row_min,row_max = (fend_dict[row_chrom][val]//args.resolution for val in [row_min,row_max])
         #col_min,col_max = (fend_dict[col_chrom][val]//args.resolution for val in [col_min,col_max])
@@ -137,11 +142,11 @@ for i,line in enumerate(FILE):
     freq = np.float16(freq) if float_16 else np.float64(freq)
     total += freq
     row,col = int(row),int(col)
-    if col < row:
+    if col < row and cis:
         print "Warning - lower triangle entries of the matrix have been encountered and will be ignored"
         total -= freq
         continue 
-    elif col == row:
+    elif col == row and cis:
         print "Warning - main diagonal entries of the matrix have been encountered and will be ignored"
         total -= freq
         continue
@@ -150,6 +155,7 @@ for i,line in enumerate(FILE):
     col = (fend_dict[col_chrom][col]//args.resolution)
     matrix[row,col] += freq
 FILE.close()
+del fend_dict,float_16
 
 assert(np.isclose(total,np.sum(matrix,dtype=np.float64))),"Error - matrix sum does not equal input frequency sum"
 print >> sys.stderr,("done")
@@ -161,19 +167,24 @@ print >> sys.stderr,("done")
 #   write binned frequency values to storage
 ##
 
+total = 0
 print >> sys.stderr,(''.join(["Writing binned values to storage ... "])),
 with open(args.output_filepath,'wt') as o:
     #   write interaction lines
     indices = zip(*matrix.nonzero())
     for (row,col) in indices:
-        if col > row:
-            freq = matrix[row,col]
-            if args.no_score:
-                #   short format: https://github.com/aidenlab/juicer/wiki/Pre#short-format
-                while freq > 0.0:
-                    o.write('\t'.join(['0',row_chrom,str((row*args.resolution)+1),str(row),'0',col_chrom,str((col*args.resolution)+1),str(col)])+'\n')
-                    freq -= 1.
-            else:
-                #   short with score format: https://github.com/aidenlab/juicer/wiki/Pre#short-with-score-format
-                o.write('\t'.join(['0',row_chrom,str((row*args.resolution)+1),str(row),'0',col_chrom,str((col*args.resolution)+1),str(col),str(freq)])+'\n')
+        if cis and row > col:
+            continue
+        freq = matrix[row,col]
+        if args.no_score:
+            #   short format: https://github.com/aidenlab/juicer/wiki/Pre#short-format
+            count = freq
+            while count > 0.0:
+                o.write('\t'.join(['0',row_chrom,str((row*args.resolution)+1),str(row),'0',col_chrom,str((col*args.resolution)+1),str(col)])+'\n')
+                count -= 1.
+        else:
+            #   short with score format: https://github.com/aidenlab/juicer/wiki/Pre#short-with-score-format
+            o.write('\t'.join(['0',row_chrom,str((row*args.resolution)+1),str(row),'0',col_chrom,str((col*args.resolution)+1),str(col),str(freq)])+'\n')
+        total += freq
 print >> sys.stderr,("done")
+assert(np.isclose(total,np.sum(matrix,dtype=np.float64))),"Error - entries in the binned matrix not written to storage"
