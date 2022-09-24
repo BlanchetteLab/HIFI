@@ -10,10 +10,15 @@
 #   Author: Christopher JF Cameron
 #
 
-import argparse,os,sys,matplotlib
+from __future__ import print_function
+
+import argparse
+import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+import sys
 
 from matplotlib.patches import Rectangle
 from matplotlib.collections import PatchCollection
@@ -22,12 +27,12 @@ cmap="jet"  #   colour map to be used by Matplotlib, see others here:https://mat
 
 def buildIFmatrix(input_filepath,vmax):
     """Build full Hi-C IF matrix"""
-    f=gzip.open(input_filepath,"rb") if(input_filepath.endswith(".gz")) else open(input_filepath,"rU")
+    f=gzip.open(input_filepath,"rb") if(input_filepath.endswith(".gz")) else open(input_filepath,'r')
     #process header
     header=f.readline().rstrip()
     if(not header.startswith("#")): #first line in HIFI sparse matrix file is not a header
-        print "Error - unspecified range for plotting and no header line present in HIFI output file"
-        sys.exit(2)    
+        print("Error - unspecified range for plotting and no header line present in HIFI output file")
+        sys.exit(2)
     first_row,last_row,first_col,last_col=[int(val) for val in header[1:].split()]
 
     #create empty matrix
@@ -54,25 +59,26 @@ def buildIFmatrix(input_filepath,vmax):
             elif(row_RF>(last_row-first_row)): #outside matrix boundaries, skip remaining file
                 break
     f.close()
-    
+
     #   read count normalize IF matrix
     for i,row in enumerate(matrix):
         for j,val in enumerate(row):
             freq=np.log10(((val/total)*1000000.0)+1.0)
             matrix[i][j]=freq
-    
+
     #   set diagonal to largest value in matrix
-    for i,j in zip(xrange(0,n,1),xrange(0,m,1)):
+    for i,j in zip(np.arange(0,n,1,dtype=np.int32),np.arange(0,m,1,dtype=np.int32)):
         matrix[i][j]=vmax
 
     return matrix,chrom_A,[first_row,last_row,first_col,last_col]
 
-def getRFdata(digest_filepath,target_chrom,(min_y,max_y,min_x,max_x)):
+def getRFdata(digest_filepath,target_chrom,matrix_boundaries):
     "Parse expected restriction fragment (RF) BED file and determine RF sizes"
+    min_y,max_y,min_x,max_x = matrix_boundaries
     #   determine fragment sizes
     i=-1
     RF_dict={"x":{"sizes":[],"start":None,"end":None},"y":{"sizes":[],"start":None,"end":None}}
-    with open(digest_filepath,"rU") as f:
+    with open(digest_filepath,'r') as f:
         for line in f:
             cur_chrom,start,end=line.rstrip().split()
             if(cur_chrom==target_chrom):
@@ -92,14 +98,14 @@ def getRFdata(digest_filepath,target_chrom,(min_y,max_y,min_x,max_x)):
                     break
             elif(not RF_dict["y"]["start"]==None):  #   chromosome of interest already observed
                 break
-    
+
     for axis in ["x","y"]:
         #   normalize RF lengths
         total=float(sum(RF_dict[axis]["sizes"]))
         RF_dict[axis]["sizes"]=[val/total for val in RF_dict[axis]["sizes"]]
         #   define axis labels
         RF_dict[axis]["label"]="".join([target_chrom.replace("chr","Chromosome "),": ",str(RF_dict[axis]["start"])," - ",str(RF_dict[axis]["end"])])
-        
+
     return RF_dict
 
 def plotSparseMatrix(matrix,chrom,vmin,vmax,RF_dict,output_filepath):
@@ -130,24 +136,24 @@ def plotSparseMatrix(matrix,chrom,vmin,vmax,RF_dict,output_filepath):
     cbar.outline.set_visible(False)
     cbar.ax.tick_params(labelsize=16,length=4,width=0.5,color="grey")
     ax.tick_params(axis="x",which="both",bottom=False,top=False,direction="out",length=4,width=0.5,pad=10,color="grey",labelsize=16)
-    ax.xaxis.set_label_position("top") 
+    ax.xaxis.set_label_position("top")
     ax.set_xlabel(RF_dict["x"]["label"],fontsize=16,labelpad=8.25)
     ax.xaxis.tick_top()
     ax.tick_params(axis="y",which="both",left=False,right=False,direction="out",length=4,width=0.5,color="grey",labelsize=16)
     ax.set_ylabel(RF_dict["y"]["label"],fontsize=16,labelpad=None)
     ax.grid(False)
-    #   remove x and y ticks  
+    #   remove x and y ticks
     plt.xticks([],[])
     plt.yticks([],[])
     #   remove axis edges
-    for axis in ["bottom","top","left","right"]:    
+    for axis in ["bottom","top","left","right"]:
         plt.gca().spines[axis].set_visible(False)
     ax.set_aspect("equal")
     plt.tight_layout()
     plt.savefig(output_filepath+".png",format="png",dpi=600,transparent=False,bbox_inches="tight")
     plt.savefig(output_filepath+".pdf",format="pdf",transparent=False,bbox_inches="tight")
     plt.close()
-    
+
     #save matrix
     np.savetxt(output_filepath+".csv",matrix,delimiter=",")
 
@@ -165,15 +171,15 @@ output_directory=os.path.join(args.output_dir,"")
 if(not os.path.exists(output_directory)):
     os.makedirs(output_directory)
 
-print >> sys.stderr,("Building HIFI sparse matrix ... "),
+print("Building HIFI sparse matrix ... ",file=sys.stderr,end='')
 matrix,chrom,matrix_boundaries=buildIFmatrix(args.HIFI_output,args.vmax)
-print >> sys.stderr, ("Done")
+print("Done",file=sys.stderr)
 
-print >> sys.stderr,("Importing restriction fragment information ... "),
+print("Importing restriction fragment information ... ",file=sys.stderr,end='')
 RF_dict=getRFdata(args.digest_filepath,chrom,matrix_boundaries)
-print >> sys.stderr, ("Done")
+print("Done",file=sys.stderr)
 
-print >> sys.stderr,("Plotting full matrix ... "),
+print("Plotting full matrix ... ",file=sys.stderr,end='')
 output_filename=".".join(os.path.basename(args.HIFI_output).split(".")[:-1])
 plotSparseMatrix(matrix,chrom,args.vmin,args.vmax,RF_dict,output_directory+output_filename)
-print >> sys.stderr, ("Done")
+print("Done",file=sys.stderr)
