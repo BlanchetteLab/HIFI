@@ -70,6 +70,9 @@ def buildIFmatrix(input_filepath,vmax):
     for i,j in zip(np.arange(0,n,1,dtype=np.int32),np.arange(0,m,1,dtype=np.int32)):
         matrix[i][j]=vmax
 
+    #	check that all matrix values are floats
+    assert(all(isinstance(val,float) for val in matrix.flatten())),"Error - non-numeric values from in data matrix"
+
     return matrix,chrom_A,[first_row,last_row,first_col,last_col]
 
 def getRFdata(digest_filepath,target_chrom,matrix_boundaries):
@@ -161,10 +164,14 @@ def plotSparseMatrix(matrix,chrom,vmin,vmax,RF_dict,output_filepath):
 parser=argparse.ArgumentParser()
 parser.add_argument("HIFI_output",help="file path to HIFI sparse matrix (recommend filtering before plotting - see 'parseHIFIoutput.py')")
 parser.add_argument("digest_filepath",help="expected restriction fragment digest (BED) filepath")
-parser.add_argument("vmin",help="minimum value to be used for colour palette range")
-parser.add_argument("vmax",help="maximum value to be used for colour palette range")
+parser.add_argument("vmin",help="minimum value to be used for colour palette range",type=float)
+parser.add_argument("vmax",help="maximum value to be used for colour palette range",type=float)
 parser.add_argument("output_dir",help="file path to output directory")
 args=parser.parse_args()
+
+assert(os.path.exists(args.HIFI_output)),"Error - HIFI sparse matrix file does not exist"
+assert(os.path.exists(args.digest_filepath)),"Error - restriction fragment digest file does not exist"
+assert(isinstance(args.vmin,float) and isinstance(args.vmin,float)),"Error - vmin and vmax must be a numeric value"
 
 #   ensure output directory exists
 output_directory=os.path.join(args.output_dir,"")
@@ -172,14 +179,17 @@ if(not os.path.exists(output_directory)):
     os.makedirs(output_directory)
 
 print("Building HIFI sparse matrix ... ",file=sys.stderr,end='')
+sys.stderr.flush()
 matrix,chrom,matrix_boundaries=buildIFmatrix(args.HIFI_output,args.vmax)
 print("Done",file=sys.stderr)
 
 print("Importing restriction fragment information ... ",file=sys.stderr,end='')
+sys.stderr.flush()
 RF_dict=getRFdata(args.digest_filepath,chrom,matrix_boundaries)
 print("Done",file=sys.stderr)
 
 print("Plotting full matrix ... ",file=sys.stderr,end='')
+sys.stderr.flush()
 output_filename=".".join(os.path.basename(args.HIFI_output).split(".")[:-1])
 plotSparseMatrix(matrix,chrom,args.vmin,args.vmax,RF_dict,output_directory+output_filename)
 print("Done",file=sys.stderr)
