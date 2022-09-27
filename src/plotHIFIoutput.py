@@ -71,7 +71,7 @@ def buildIFmatrix(input_filepath,vmax):
         matrix[i][j]=vmax
 
     #	check that all matrix values are floats
-    assert(all(isinstance(val,float) for val in matrix.flatten())),"Error - non-numeric values from in data matrix"
+    assert(all(isinstance(val,float) for val in matrix.flatten())),"Error - non-numeric values found in data matrix"
 
     return matrix,chrom_A,[first_row,last_row,first_col,last_col]
 

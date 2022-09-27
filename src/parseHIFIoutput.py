@@ -20,6 +20,7 @@ def determineRangeFragments(fend_filepath,target_chrom,bp_start,bp_end):
     """Parse restriction fragment BED file for fragments within desired range"""
     min_RF,max_RF=None,None
     print("Parsing restriction fragment file ... ",file=sys.stderr,end='')
+    sys.stderr.flush()
     with open(fend_filepath,'r') as f:
         i=-1  #   fragment id
         for line in f:
@@ -37,6 +38,7 @@ def determineRangeFragments(fend_filepath,target_chrom,bp_start,bp_end):
 def parseHIFIoutput(input_filepath,output_filepath,RF_start,RF_end,target_chrom):
     """Parses HIFI sparse matrix file for desired restriction fragment (RF) pairwise interactions within range"""
     print("Parsing HIFI sparse matrix file ... ",file=sys.stderr,end='')
+    sys.stderr.flush()
     with open(output_filepath,"w") as o:
         o.write("#"+" ".join([str(val) for val in [RF_start,RF_end,RF_start,RF_end]])+"\n")
         f=gzip.open(input_filepath,"rb") if input_filepath.endswith(".gz") else open(input_filepath,'r')

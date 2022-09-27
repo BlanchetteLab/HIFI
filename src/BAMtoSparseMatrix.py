@@ -64,6 +64,7 @@ def parseDigestFile(digest_filepath,obs_chroms):
     array_dict={}
     cut_sites,prev_chrom=None,None
     print("Building chromosome digest arrays ... ",file=sys.stderr,end='')
+    sys.stderr.flush()
     with open(digest_filepath,"r") as FILE:
         for line in FILE:
             cur_chrom,start,end=line.rstrip().split()[:3]
@@ -74,6 +75,7 @@ def parseDigestFile(digest_filepath,obs_chroms):
                     array_dict[prev_chrom]=buildChromosomeArray(cut_sites)
                 if(cur_chrom in obs_chroms):
                     print(chrom,file=sys.stderr,end=' ')
+                    sys.stderr.flush()
                 cut_sites=[start,end]
             else:
                 #   append to existing cut site list
@@ -89,6 +91,7 @@ def parseDigestFile(digest_filepath,obs_chroms):
 def iterateOverSAMFiles(array_dict,LOG_filepath,output_prefix):
     """Iterate over chromosome temporary files and bin by expected restriction fragments in sparse matrix format"""
     print("Binning temporary files by expected enzyme digest ... ",file=sys.stderr,end='')
+    sys.stderr.flush()
     with open(LOG_filepath,"a") as LOG:
         for filepath in glob.glob(output_prefix+"*.tmp"):
             basename=os.path.basename(filepath)
@@ -167,6 +170,7 @@ LOG_filepath=output_directory+basename+".BAMtoSparseMatrix."+date_stamp+".log"
 with open(LOG_filepath,"w") as LOG:
     LOG.write("#  Log file for BAMtoSparseMatrix v1.03 (author: Christopher JF Cameron)\n\n")
     print(''.join(["Converting '",basename,"' to temporary chromosome interaction files ... "]),file=sys.stderr,end='')
+    sys.stderr.flush()
     convert_sam_to_bam(output_prefix,args.bam_filepath)
     if(len(glob.glob(''.join([output_prefix,"*.tmp"]))) > 0):
         print("Done",file=sys.stderr)

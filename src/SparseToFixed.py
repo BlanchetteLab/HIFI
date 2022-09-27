@@ -28,8 +28,15 @@
 #   Author: Christopher JF Cameron
 #
 
-import argparse,gzip,os,re,sys
+from __future__ import print_function
+
+import argparse
+import gzip
 import numpy as np
+import os
+import re
+import sys
+
 np.set_printoptions(precision=15)
 
 def get_matrix_dimensions(filepath):
@@ -38,13 +45,15 @@ def get_matrix_dimensions(filepath):
     with open(filepath,'rt') as f:
         for line in f:
             try: freq,row_chrom,row,col_chrom,col = line.rstrip().split()
-            except ValueError: print "Error - sparse matrix file is not in the expected format"
+            except ValueError:
+                print("Warning - sparse matrix file is not in the expected format",file=sys.stderr,end='')
+                sys.stderr.flush()
             row,col = int(row),int(col)
             row_min = row if row_min == None or row < row_min else row_min
             row_max = row if row_max == None or row > row_max else row_max
             col_min = col if col_min == None or col < col_min else col_min
             col_max = col if col_max == None or col > col_max else col_max
-            
+
     return row_min,row_max,col_min,col_max
 
 def get_chrom_fends(filepath,chrom,frag_start):
@@ -75,7 +84,7 @@ out_dir = os.path.dirname(args.output_filepath)
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 del out_dir
-                                                                                                                                                
+
 ##
 #   parse sparse matrix file
 ##
@@ -88,7 +97,8 @@ if header.startswith('#'):
     row_min,row_max,col_min,col_max = [int(val) for val in header.replace('#','').split()]
 else:
     #   no header line present in file
-    print "Warning - header not found in sparse matrix file. Parsing file to determine dimensions."
+    print("Warning - header not found in sparse matrix file. Parsing file to determine dimensions.",file=sys.stderr,end='')
+    sys.stderr.flush()
     row_min,row_max,col_min,col_max = get_matrix_dimensions(args.sparse_matrix_filepath)
     FILE.seek(0)
 
@@ -96,7 +106,9 @@ cis = False
 float_16 = False
 for i,line in enumerate(FILE):
     try: freq,row_chrom,row,col_chrom,col = line.rstrip().split()
-    except ValueError: print "Error - sparse matrix file is not in the expected format"
+    except ValueError:
+        print("Warning - sparse matrix file is not in the expected format",file=sys.stderr,end='')
+        sys.stderr.flush()
     row_chrom = row_chrom if row_chrom.startswith("chr") else ''.join(["chr",row_chrom])
     col_chrom = col_chrom if col_chrom.startswith("chr") else ''.join(["chr",col_chrom])
 
@@ -106,19 +118,22 @@ for i,line in enumerate(FILE):
         unknown_chrom = False
         for chrom in set([row_chrom,col_chrom]):
             chrom = chrom if chrom.startswith("chr") else ''.join(["chr",chrom])
-            print >> sys.stderr,(''.join(["Importing '",chrom,"' expected fends ... "])),
+            print(''.join(["Importing '",chrom,"' expected fends ... "]),file=sys.stderr,end='')
+            sys.stderr.flush()
             fend_dict[chrom] = get_chrom_fends(args.digest_filepath,chrom,args.start)
             if len(fend_dict[chrom]) == 0:
-                print >> sys.stderr,(''.join(["Warning - unknown chromosome '",chrom,"' encountered and interaction ignored"])),
+                print(''.join(["Warning - unknown chromosome '",chrom,"' encountered and interaction ignored"]),file=sys.stderr,end='')
+                sys.stderr.flush()
                 del fend_dict[chrom]
                 unknown_chrom = True
-            print >> sys.stderr,("done")
+            print("Done",file=sys.stderr)
         if unknown_chrom:
             continue
         if row_chrom == col_chrom:
             cis = True
-            
-        print >> sys.stderr,(''.join(["Initializing frequncy matrix ... "])),
+
+        print(''.join(["Initializing frequncy matrix ... "]),file=sys.stderr,end='')
+        sys.stderr.flush()
         #   initialize fixed binned matrix
         max_val = max(fend_dict[row_chrom][row_max]//args.resolution,
             fend_dict[col_chrom][col_max]//args.resolution)
@@ -127,27 +142,31 @@ for i,line in enumerate(FILE):
         #col_min,col_max = (fend_dict[col_chrom][val]//args.resolution for val in [col_min,col_max])
         #n = abs(row_max-row_min)+1
         #m = abs(col_max-col_min)+1
-        try: 
+        try:
             matrix = np.zeros((n,m),dtype=np.float64)
             total = np.float64(0.0)
         except MemoryError:
-            print >> sys.stderr,("Warning - not enough available memory to allocate for a matrix of datatype 'np.float64'. Trying 'np.float16' instead. Expect a loss of precision in matrix values."),
+            print("Warning - not enough available memory to allocate for a matrix of datatype 'np.float64'. Trying 'np.float16' instead. Expect a loss of precision in matrix values.",file=sys.stderr,end='')
+            sys.stderr.flush()
             matrix = np.zeros((n,m),dtype=np.float16)
             float_16 = True
             total = np.float16(0.0)
-        print >> sys.stderr,("done")
+        print("Done",file=sys.stderr)
 
-        print >> sys.stderr,(''.join(["Parsing sparse matrix file ... "])),
-    
+        print(''.join(["Parsing sparse matrix file ... "]),file=sys.stderr,end='')
+        sys.stderr.flush()
+
     freq = np.float16(freq) if float_16 else np.float64(freq)
     total += freq
     row,col = int(row),int(col)
     if col < row and cis:
-        print "Warning - lower triangle entries of the matrix have been encountered and will be ignored"
+        print("Warning - lower triangle entries of the matrix have been encountered and will be ignored",file=sys.stderr,end='')
+        sys.stderr.flush()
         total -= freq
-        continue 
+        continue
     elif col == row and cis:
-        print "Warning - main diagonal entries of the matrix have been encountered and will be ignored"
+        print("Warning - main diagonal entries of the matrix have been encountered and will be ignored",file=sys.stderr,end='')
+        sys.stderr.flush()
         total -= freq
         continue
     #   bin interaction values
@@ -158,7 +177,7 @@ FILE.close()
 del fend_dict,float_16
 
 assert(np.isclose(total,np.sum(matrix,dtype=np.float64))),"Error - matrix sum does not equal input frequency sum"
-print >> sys.stderr,("done")
+print("Done",file=sys.stderr)
 
 ### print number of reads lost by ignoring the main diagonal
 #print np.sum(matrix.diagonal(),dtype=np.float64)
@@ -168,7 +187,8 @@ print >> sys.stderr,("done")
 ##
 
 total = 0
-print >> sys.stderr,(''.join(["Writing binned values to storage ... "])),
+print(''.join(["Writing binned values to storage ... "]),file=sys.stderr,end='')
+sys.stderr.flush()
 with open(args.output_filepath,'wt') as o:
     #   write interaction lines
     indices = zip(*matrix.nonzero())
@@ -186,5 +206,5 @@ with open(args.output_filepath,'wt') as o:
             #   short with score format: https://github.com/aidenlab/juicer/wiki/Pre#short-with-score-format
             o.write('\t'.join(['0',row_chrom,str((row*args.resolution)+1),str(row),'0',col_chrom,str((col*args.resolution)+1),str(col),str(freq)])+'\n')
         total += freq
-print >> sys.stderr,("done")
+print("Done",file=sys.stderr)
 assert(np.isclose(total,np.sum(matrix,dtype=np.float64))),"Error - entries in the binned matrix not written to storage"
