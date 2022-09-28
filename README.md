@@ -21,7 +21,7 @@ Step 5: (optional) Call loops using the callPeaks program.
 ## Software requirements
 1) Linux with g++ compiler
 2) SAMtools: http://www.htslib.org/download/
-3) Python v2.7 interpreter: https://www.anaconda.com/distribution/ 
+3) Python v2.7 or v3.7 interpreter: https://www.anaconda.com/distribution/ 
 4) Matplotlib (should be installed with most versions of Python; or can be installed using Anaconda (https://conda.io/docs/user-guide/install/download.html)).
 5) NumPy (should be installed with most versions of Python; or can be installed using Anaconda (https://conda.io/docs/user-guide/install/download.html)).
 
